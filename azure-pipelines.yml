@@ -1,0 +1,52 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+ 
+  
+trigger:
+- master
+  
+variables:
+  dockerId: 'wbdocker'
+  imageName: 'spring-demo'
+  pswd: 'uwEUaqxbc98dw8vNMCWiIk2G/pO=k8gQ'
+   
+
+steps:
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    mavenOptions: '-Xmx3072m'
+    publishJUnitResults: false
+    testResultsFiles: '**/TEST-*.xml'
+    goals: 'package'
+
+- script: |
+    echo "=== copy jar file"
+    pwd
+    cp target/*.jar .
+    echo "=== list current dir"
+    ls -al
+    echo "=== starting to build image"
+    docker build -t $(dockerId).azurecr.cn/$(imageName) .
+    echo "=== list docker images"
+    docker images
+    echo "=== starting to push image to registry"
+    echo $(date)
+    echo "=== starting to login acr"
+    docker login -u $(dockerId) -p $(pswd) $(dockerId).azurecr.cn
+    echo "=== pushing images"
+    docker push $(dockerId).azurecr.cn/$(imageName)
+    echo $(date)
+    echo "=== tag to BuildId"
+    docker tag $(dockerId).azurecr.cn/$(imageName) $(dockerId).azurecr.cn/$(imageName):$(Build.BuildId)
+    echo "=== pushing BuildId images"
+    docker push $(dockerId).azurecr.cn/$(imageName):$(Build.BuildId)
+    docker images
+   # echo "=== remove images"
+   # docker rmi $(dockerId).azurecr.cn/$(imageName)
+   # docker rmi $(dockerId).azurecr.cn/$(imageName):$(Build.BuildId)
+   # echo "=== after remove images"
+   # docker images
+   # echo "finished."
