@@ -8,11 +8,8 @@ public class DemoApplication {
 	
 	public static void main(String[] args) { 
 		
-		System.out.println("docker 镜像启动！！！！！");
-		
-		System.out.println("Hello  Azure DevOps !!!!!!!!!!! Test Azure DevOps");
-		
-		
+		System.out.println("Mac book");
+		 
 		SpringApplication.run(DemoApplication.class, args);
 	}
 
